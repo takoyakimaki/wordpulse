@@ -1,0 +1,21 @@
+{
+    "name": "word-pulse",
+    "version": "1.0.0",
+    "description": "WordPulse: Create Dynamic and Engaging Word Clouds in Real-Time",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "prettier": "3.2.5"
+    },
+    "dependencies": {
+        "express": "^4.19.2",
+        "ws": "^8.17.0"
+    }
+}

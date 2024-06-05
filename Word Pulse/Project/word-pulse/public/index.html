@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WordPulse: Create Dynamic and Engaging Word Clouds in Real-Time</title>
+        <meta
+            name="description"
+            content="Engage your audience with WordPulse. Quickly generate captivating word clouds that update in real-time based on collective input. Perfect for meetings, classrooms, and events."
+        />
+
+        <!-- TailwindCSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+        <style type="text/tailwindcss">
+            @layer base {
+                @font-face {
+                    font-family: 'DM Sans';
+                    font-weight: 100, 200, 300, 400, 500, 600, 700, 800, 900;
+                    font-display: swap;
+                    src: url('/fonts/DMSans-VariableFont_opsz,wght.woff2') format('woff2');
+                }
+            }
+        </style>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['DM Sans', 'ui-sans-serif', 'system-ui'],
+                        },
+                        colors: {
+                            primary: '#003720',
+                            secondary: '#afb7b4',
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+
+    <body
+        class="min-h-screen text-gray-900 antialiased h-full"
+        style="
+            background: radial-gradient(at 53% 78%, rgba(255, 255, 0, 0.3) 0px, transparent 50%),
+                radial-gradient(at 71% 91%, rgba(51, 255, 0, 0.3) 0px, transparent 50%),
+                radial-gradient(at 31% 91%, rgba(255, 128, 0, 0.17) 0px, transparent 50%);
+        "
+    >
+        <div class="py-12">
+            <!-- Main Page -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="page_main">
+                <div class="lg:text-center">
+                    <h2 class="text-base text-primary font-semibold tracking-wide uppercase">WORD PULSE</h2>
+                    <p class="mt-2 text-4xl md:text-5xl lg:text-7xl leading-8 font-extrabold tracking-tight text-secondary max-w-4xl lg:mx-auto">
+                        Engage your audience with dynamic word clouds using <span class="text-primary">WordPulse</span>.
+                    </p>
+                    <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                        WordPulse lets you create captivating word clouds quickly and easily. Pose your question and watch as vibrant words appear in
+                        real-time, reflecting the collective input of your audience.
+                    </p>
+                </div>
+
+                <div class="mt-10 flex gap-3 items-center lg:justify-center">
+                    <button
+                        onclick="showPage('page_create_room')"
+                        class="w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/80 sm:mt-0 sm:flex-shrink-0 sm:inline-flex sm:items-center sm:w-auto"
+                    >
+                        Create Room
+                    </button>
+                    <button
+                        onclick="showPage('page_join_room')"
+                        class="w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-gray-100 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/80 sm:mt-0 sm:flex-shrink-0 sm:inline-flex sm:items-center sm:w-auto"
+                    >
+                        Join Room
+                    </button>
+                </div>
+            </div>
+
+            <!-- Create Room -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 hidden" id="page_create_room">
+                <div class="lg:text-center">
+                    <h2 class="text-base text-primary font-semibold tracking-wide uppercase">WORD PULSE</h2>
+                    <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-primary/80 sm:text-4xl">Create a topic</p>
+                    <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">ex. What words come to mind when you hear about climate change?</p>
+                </div>
+
+                <div class="mt-10 max-w-lg lg:mx-auto">
+                    <div class="mt-3">
+                        <label for="topic" class="sr-only">Room Name</label>
+                        <textarea
+                            name="topic"
+                            id="topic"
+                            required
+                            class="block w-full py-3 text-base rounded-md placeholder-gray-500 shadow-sm focus:ring-primary/80 focus:border-primary/80 sm:flex-1 border-gray-300"
+                            placeholder="Enter topic here..."
+                        ></textarea>
+                    </div>
+                    <div class="mt-3 flex flex-col gap-3">
+                        <button
+                            onclick="createRoom()"
+                            class="mt-3 w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/80 sm:mt-0 sm:flex-shrink-0 sm:inline-flex sm:items-center sm:justify-center sm:w-auto"
+                        >
+                            Create
+                        </button>
+                        <button
+                            id="random-topic-button"
+                            onclick="fetchRandomWikipediaTopic()"
+                            class="w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/80 sm:mt-0 sm:inline-flex sm:items-center sm:justify-center sm:w-auto"
+                        >
+                            Generate Random Topic
+                        </button>
+                    </div>
+                    <div class="mt-6">
+                        <p id="summary"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Join Room -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 hidden" id="page_join_room">
+                <div class="lg:text-center">
+                    <h2 class="text-base text-primary font-semibold tracking-wide uppercase">WORD PULSE</h2>
+                    <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-primary/80 sm:text-4xl">Join Room</p>
+                    <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">Enter the room id to join the room.</p>
+                </div>
+
+                <div class="mt-10 max-w-lg lg:mx-auto">
+                    <div class="mt-3 sm:flex">
+                        <label for="id" class="sr-only">Room ID</label>
+                        <input
+                            type="text"
+                            name="id"
+                            id="id"
+                            class="block w-full py-3 text-base rounded-md placeholder-gray-500 shadow-sm focus:ring-primary/80 focus:border-primary/80 sm:flex-1 border-gray-300"
+                            placeholder="Enter Room ID here..."
+                        />
+                        <button
+                            onclick="joinRoom()"
+                            class="mt-3 w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/80 sm:mt-0 sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center sm:w-auto"
+                        >
+                            Join
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Room -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 hidden relative" id="page_active_room">
+                <div class="lg:text-center">
+                    <h2 class="text-base text-primary font-semibold tracking-wide uppercase">WORD PULSE</h2>
+                    <p
+                        class="mt-2 text-3xl text-pretty lg:mx-auto max-w-xl lg:text-center leading-8 font-extrabold tracking-tight text-primary/80 sm:text-4xl"
+                    >
+                        <span id="room-name"></span>
+                    </p>
+                    <p class="mt-4 max-w-2xl lg:mx-auto text-xl text-gray-500 flex items-center lg:justify-center">
+                        <span class="mr-2">Room ID: <span id="room-id"></span></span>
+                        <button title="Copy to clipboard" onclick="copyRoomID()" class="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="lucide lucide-copy"
+                            >
+                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                            </svg>
+                        </button>
+                    </p>
+                    <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                        <span>Participants: <span id="room-participants"></span></span>
+                    </p>
+                </div>
+
+                <!-- Exit Button -->
+                <button
+                    type="button"
+                    class="absolute -top-4 lg:top-4 right-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-600 shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    onclick="location.reload()"
+                >
+                    Exit Room
+                </button>
+
+                <div class="lg:mx-auto w-full min-h-[60vh]">
+                    <canvas id="canvas"></canvas>
+                </div>
+
+                <div class="fixed inset-x-4 sm:inset-x-6 bottom-6 lg:inset-x-0">
+                    <div class="max-w-lg lg:mx-auto">
+                        <div class="grid place-content-center">
+                            <button onclick="downloadWordCloud()" class="underline">Download WordCloud</button>
+                        </div>
+                        <div class="mt-3 sm:flex">
+                            <label for="words" class="sr-only">Words</label>
+                            <input
+                                type="text"
+                                name="words"
+                                id="words"
+                                class="block w-full py-3 text-base rounded-md placeholder-gray-500 shadow-sm focus:ring-primary/80 focus:border-primary/80 sm:flex-1 border-gray-300"
+                                placeholder="Enter words here..."
+                            />
+                            <button
+                                onclick="addWords()"
+                                class="mt-3 w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/80 sm:mt-0 sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center sm:w-auto"
+                            >
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script src="https://unpkg.com/chart.js@4.4"></script>
+    <script src="https://unpkg.com/chartjs-chart-wordcloud@4.4"></script>
+    <script defer src="app.js"></script>
+</html>
